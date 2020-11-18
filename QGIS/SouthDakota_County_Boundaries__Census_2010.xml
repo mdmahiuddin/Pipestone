@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><MD_Metadata xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:xalan="http://xml.apache.org/xalan" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.isotc211.org/2005/gmd">
+<fileIdentifier>
+<gco:CharacterString>9243e3d9be1e4215a6b0407969e9aefe</gco:CharacterString>
+</fileIdentifier>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<hierarchyLevel>
+<MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</MD_ScopeCode>
+</hierarchyLevel>
+<hierarchyLevelName>
+<gco:CharacterString>dataset</gco:CharacterString>
+</hierarchyLevelName>
+<contact>
+<CI_ResponsibleParty>
+<individualName>
+<gco:CharacterString>Danielle Guthrie</gco:CharacterString>
+</individualName>
+<organisationName>
+<gco:CharacterString>BIT</gco:CharacterString>
+</organisationName>
+<role>
+<CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" codeSpace="ISOTC211/19115">pointOfContact</CI_RoleCode>
+</role>
+</CI_ResponsibleParty>
+</contact>
+<dateStamp>
+<gco:Date>2017-11-02</gco:Date>
+</dateStamp>
+<metadataStandardName>
+<gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
+</metadataStandardName>
+<metadataStandardVersion>
+<gco:CharacterString>2007</gco:CharacterString>
+</metadataStandardVersion>
+<identificationInfo>
+<MD_DataIdentification>
+<citation>
+<CI_Citation>
+<title>
+<gco:CharacterString>SouthDakota_CountyBoundaries</gco:CharacterString>
+</title>
+<date>
+<CI_Date>
+<date>
+<gco:Date>2017-11-02</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="ISOTC211/19115">publication</CI_DateTypeCode>
+</dateType>
+</CI_Date>
+</date>
+</CI_Citation>
+</citation>
+<abstract>
+<gco:CharacterString>County boundaries based on Census data.</gco:CharacterString>
+</abstract>
+<purpose>
+<gco:CharacterString>County boundaries based on Census data.</gco:CharacterString>
+</purpose>
+<credit>
+<gco:CharacterString>SD BIT</gco:CharacterString>
+</credit>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>government</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>boundaries</gco:CharacterString>
+</keyword>
+</MD_Keywords>
+</descriptiveKeywords>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>government</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>boundaries</gco:CharacterString>
+</keyword>
+</MD_Keywords>
+</descriptiveKeywords>
+<language>
+<LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+</language>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<topicCategory>
+<MD_TopicCategoryCode>boundaries</MD_TopicCategoryCode>
+</topicCategory>
+</MD_DataIdentification>
+</identificationInfo>
+<distributionInfo>
+<MD_Distribution>
+<transferOptions>
+<MD_DigitalTransferOptions>
+<onLine>
+<CI_OnlineResource>
+<linkage>
+<URL>http://arcgis.sd.gov/arcgis/rest/services/OpenData/SouthDakota_CountyBoundaries/MapServer</URL>
+</linkage>
+</CI_OnlineResource>
+</onLine>
+</MD_DigitalTransferOptions>
+</transferOptions>
+</MD_Distribution>
+</distributionInfo>
+</MD_Metadata>
