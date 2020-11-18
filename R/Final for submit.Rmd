@@ -1,0 +1,588 @@
+---
+title: "Final Project"
+author: "Md Mahi Uddin"
+date: "December 8, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+##Sub-Task 1
+##Exploratory Analysis
+
+##Developing appropriate response response variable
+##Import Dataset
+
+DSL.StrongPasswordData <- read.csv("C:/Users/DELETE ME METTE/Desktop/My Folder/Fall 2018/Modern Applied Statistics I/Final Project/DSL-StrongPasswordData.txt", sep="")
+
+
+passcodefinal<- DSL.StrongPasswordData
+
+names(passcodefinal)
+
+summary(passcodefinal)
+
+
+##Explore whole data set for basic information
+
+
+library(dplyr)
+library(funModeling) 
+
+basic_eda <- function(d1)
+{
+  glimpse(d1)
+  df_status(d1)
+  freq(d1) 
+  profiling_num(d1)
+  plot_num(d1)
+  describe(d1)
+}
+
+
+##Basic Exploratory Analysis
+##Ref: https://dzone.com/articles/exploratory-data-analysis-in-r-introduction
+
+##types of variables
+glimpse(passcodefinal)
+
+
+##find out the uniqueness and type of variables
+df_status(passcodefinal)
+
+
+##frequency and cumulative percentage of total data
+freq(passcodefinal) 
+
+
+##profile of different information including skewness and kurtosis with graph
+profiling_num(passcodefinal)
+
+
+##count VS value of different variables
+plot_num(passcodefinal)
+
+
+##lowest and highest value of each variables
+describe(passcodefinal)
+
+
+##find out the missing value
+table(is.na(passcodefinal))
+
+
+##is there any duplicate row?
+dup_idx <- duplicated(passcodefinal)
+dup_rows <- passcodefinal[dup_idx, ]
+dup_rows
+
+##Set the question of interest
+
+##"The question of interest here are: whether the responses of amount of average total time to type the passcode that differ and how the different sessionindex with subject affect the response."
+##1. Does the mean of the amount of total time significantly relate with session index and individuals?
+
+##Descriptions
+
+##Divide the data set
+
+##Numerical sub set
+##make subset with numeric variables
+d_num_pass_final<- subset(passcodefinal, select = 4:34)
+
+
+##Find the Correlation from numerical subset
+cor(d_num_pass_final) 
+##All UD and DD are highly correlated.
+#we can drop all DD or All UD
+
+
+##Drop the correlated variables
+
+
+##All DD variables
+pass_codeDD<-   subset(d_num_pass_final, select = c(DD.period.t  ,DD.t.i, DD.i.e, DD.e.five, DD.five.Shift.r, DD.Shift.r.o, DD.o.a,  DD.a.n,  DD.n.l, DD.l.Return, H.Return))
+names(pass_codeDD)
+
+
+##All UD and H variables
+pass_codeUDH<- subset(d_num_pass_final, select = c(H.period, UD.period.t, H.t, UD.t.i, H.i,UD.i.e, H.e, UD.e.five,H.five, UD.five.Shift.r,H.Shift.r,UD.Shift.r.o, H.o, UD.o.a, H.a, UD.a.n, H.n, UD.n.l, H.l,  UD.l.Return, H.Return  ))
+names(pass_codeUDH)
+
+
+##Correlation within DD variables and H.Return
+cor(pass_codeDD)
+
+
+##Correlation within UD and H variables and H.Return
+cor(pass_codeUDH)
+
+
+##Make total time from separate data set to check the equation DD=UD+H
+##Find out the total time from  non correlated numerical variables of two subset(two side of the equation)
+
+##total time in DD
+Total_timeDD <- apply(pass_codeDD[,1:11],1,sum)
+pass_DDT_all_var<- cbind(pass_codeDD, Total_timeDD)
+pass_DDT<- subset(pass_DDT_all_var, select=(Total_timeDD))
+
+
+##total time in UD and H
+Total_timeUDH <- apply(pass_codeUDH[,1:21],1,sum)
+pass_UDHT_all_var<- cbind(pass_codeUDH, Total_timeUDH)
+pass_UDHT<- subset(pass_UDHT_all_var, select=(Total_timeUDH))
+
+##Compare two data set DD+H.Return vs UDH+H.Return
+head(Total_timeDD)
+head(Total_timeUDH)
+
+
+##We can pick any subset DD and H.Return or UDH and H.Return to find the total time as both are equal
+
+
+##Non Numerical sub set
+##make subset with non numeric variables
+d_non_num_pass_final <- subset(passcodefinal, select = 1:3)
+
+
+
+##New data set with non numeric variables and numeric total time variable
+new_pass1<- cbind(d_non_num_pass_final, pass_UDHT)
+
+
+##Making new subset after dropping rep
+new_pass<- subset(new_pass1, select = c(subject, sessionIndex, Total_timeUDH))
+
+
+##subjectwise average total time
+sub_vs_time<- aggregate(Total_timeUDH ~ subject, new_pass, mean)
+
+#rename total time varible to average total time
+# Rename a column in R
+names(sub_vs_time)[2]<-"Avg_Total_Time"
+
+
+qplot(sub_vs_time$subject, sub_vs_time$Avg_Total_Time , xlab=" Subject", ylab="Avg Total Time", main= " Subject vs avg total time to type passcode")
+
+
+##sessionwise average total time
+session_vs_time<- aggregate(Total_timeUDH ~ sessionIndex, new_pass, mean)
+
+#rename total time varible to average total time
+# Rename a column in R
+names(session_vs_time)[2]<-"Avg_Total_Time"
+
+##plot the session and avg total time
+
+qplot(session_vs_time$sessionIndex, session_vs_time$Avg_Total_Time, xlab=" Session Index", ylab="Avg Total Time", main= " session index vs avg total time to type passcode")
+
+##Find the average total time for all subject across sessionindexwise
+
+##Total time from UDH variables of mean of total time list with subject and session index
+data_prep_final<- tapply(new_pass$Total_timeUDH, list(new_pass$subject, new_pass$sessionIndex), mean)
+
+## plot of mean of total time to type passcode with setssion index and subject
+interaction.plot(new_pass$subject, new_pass$sessionIndex, new_pass$Total_timeUDH, fun= mean, legend = TRUE, trace.label = deparse(substitute(SessionIndex)), fixed = FALSE, xlab=" Subject", ylab="Avg Total Time", ylim = range(1:10),lty = 1:8, col = 1:8, main= " Subject vs avg total time to type passcode")
+
+## plot of mean of total time to type passcode with subject and session index
+interaction.plot(new_pass$sessionIndex, new_pass$subject, new_pass$Total_timeUDH,fun= mean, legend = TRUE, trace.label = deparse(substitute(Subject)), fixed = FALSE, xlab=" Session Index", ylab="Avg Total Time",ylim = range(1:10),lty = 1:51, col = 1:51, main= " session index vs avg total time to type passcode")
+##try to add color to make more smart##
+
+
+library(ggplot2)
+head(new_pass)
+
+qplot(subject, Total_timeUDH, data= new_pass, color=sessionIndex,xlab=" Subject", ylab=" Total Time", main= "Session index vs total time to type passcode")
+qplot(sessionIndex  , Total_timeUDH, data= new_pass, color=subject, xlab=" Session Index", ylab="Total Time", main= "Subject index vs total time to type passcode")
+
+
+smoothScatter(new_pass$subject, new_pass$Total_timeUDH,xlab=" Subject", ylab="Total Time", main= "Subject index vs total time to type passcode" )
+smoothScatter(new_pass$sessionIndex, new_pass$Total_timeUDH,xlab=" Session Index", ylab="Total Time", main= "Session index vs total time to type passcode")
+
+qplot(subject, Total_timeUDH, data= new_pass, color=sessionIndex, geom = c("point", "smooth"), main= "Subject index vs total time to type passcode") #not improve
+qplot(sessionIndex  , Total_timeUDH, data= new_pass, color=subject,geom = c("point", "smooth"), main= "Session index vs total time to type passcode")
+
+
+###find the easy way
+##1
+data_prep_final.1 = data_prep_final[1,]
+S.names = levels(new_pass$subject)
+data_prep_final.s1 = cbind(rep(S.names[1], 8), seq(1,8,1), data_prep_final.1 )
+
+##2
+data_prep_final.2 = data_prep_final[2,]
+S.names = levels(new_pass$subject)
+data_prep_final.s2 = cbind(rep(S.names[2], 8),seq(1,8,1), data_prep_final.2)
+
+##3
+data_prep_final.3 = data_prep_final[3,]
+S.names = levels(new_pass$subject)
+data_prep_final.s3 = cbind(rep(S.names[3], 8), seq(1,8,1), data_prep_final.3)
+
+##4
+data_prep_final.4 = data_prep_final[4,]
+S.names = levels(new_pass$subject)
+data_prep_final.s4 = cbind(rep(S.names[4], 8), seq(1,8,1), data_prep_final.4)
+
+##5
+data_prep_final.5 = data_prep_final[5,]
+S.names = levels(new_pass$subject)
+data_prep_final.s5 = cbind(rep(S.names[5], 8), seq(1,8,1), data_prep_final.5)
+
+##6
+data_prep_final.6 = data_prep_final[6,]
+S.names = levels(new_pass$subject)
+data_prep_final.s6 = cbind(rep(S.names[6], 8), seq(1,8,1), data_prep_final.6)
+
+##7
+data_prep_final.7 = data_prep_final[7,]
+S.names = levels(new_pass$subject)
+data_prep_final.s7 = cbind(rep(S.names[7], 8), seq(1,8,1), data_prep_final.7)
+
+##8
+data_prep_final.8 = data_prep_final[8,]
+S.names = levels(new_pass$subject)
+data_prep_final.s8 = cbind(rep(S.names[8], 8), seq(1,8,1), data_prep_final.8)
+
+##9
+data_prep_final.9 = data_prep_final[9,]
+S.names = levels(new_pass$subject)
+data_prep_final.s9 = cbind(rep(S.names[9], 8), seq(1,8,1), data_prep_final.9)
+
+
+##10
+data_prep_final.10 = data_prep_final[10,]
+S.names = levels(new_pass$subject)
+data_prep_final.s10 = cbind(rep(S.names[10], 8), seq(1,8,1), data_prep_final.10)
+
+
+##11
+data_prep_final.11 = data_prep_final[11,]
+S.names = levels(new_pass$subject)
+data_prep_final.s11 = cbind(rep(S.names[11], 8), seq(1,8,1), data_prep_final.11)
+
+
+##12
+data_prep_final.12 = data_prep_final[12,]
+S.names = levels(new_pass$subject)
+data_prep_final.s12 = cbind(rep(S.names[12], 8), seq(1,8,1), data_prep_final.12)
+
+
+##13
+data_prep_final.13 = data_prep_final[13,]
+S.names = levels(new_pass$subject)
+data_prep_final.s13 = cbind(rep(S.names[13], 8), seq(1,8,1), data_prep_final.13)
+
+
+##14
+data_prep_final.14 = data_prep_final[14,]
+S.names = levels(new_pass$subject)
+data_prep_final.s14 = cbind(rep(S.names[14], 8), seq(1,8,1), data_prep_final.14)
+
+
+##15
+data_prep_final.15 = data_prep_final[15,]
+S.names = levels(new_pass$subject)
+data_prep_final.s15 = cbind(rep(S.names[15], 8), seq(1,8,1), data_prep_final.15)
+
+
+##16
+data_prep_final.16 = data_prep_final[16,]
+S.names = levels(new_pass$subject)
+data_prep_final.s16 = cbind(rep(S.names[16], 8), seq(1,8,1), data_prep_final.16)
+                
+                
+##17
+data_prep_final.17 = data_prep_final[17,]
+S.names = levels(new_pass$subject)
+data_prep_final.s17 = cbind(rep(S.names[17], 8), seq(1,8,1), data_prep_final.17)
+
+
+##18
+data_prep_final.18 = data_prep_final[18,]
+S.names = levels(new_pass$subject)
+data_prep_final.s18 = cbind(rep(S.names[18], 8), seq(1,8,1), data_prep_final.18)
+
+
+##19
+data_prep_final.19 = data_prep_final[19,]
+S.names = levels(new_pass$subject)
+data_prep_final.s19 = cbind(rep(S.names[19], 8), seq(1,8,1), data_prep_final.19)
+
+
+
+##20
+data_prep_final.20 = data_prep_final[20,]
+S.names = levels(new_pass$subject)
+data_prep_final.s20 = cbind(rep(S.names[20], 8), seq(1,8,1), data_prep_final.20)
+
+##21
+data_prep_final.21 = data_prep_final[21,]
+S.names = levels(new_pass$subject)
+data_prep_final.s21 = cbind(rep(S.names[21], 8), seq(1,8,1), data_prep_final.21)
+
+
+##22
+data_prep_final.22 = data_prep_final[22,]
+S.names = levels(new_pass$subject)
+data_prep_final.s22 = cbind(rep(S.names[22], 8), seq(1,8,1), data_prep_final.22)
+
+
+##23
+data_prep_final.23 = data_prep_final[23,]
+S.names = levels(new_pass$subject)
+data_prep_final.s23 = cbind(rep(S.names[23], 8), seq(1,8,1), data_prep_final.23)
+
+
+
+##24
+data_prep_final.24 = data_prep_final[24,]
+S.names = levels(new_pass$subject)
+data_prep_final.s24 = cbind(rep(S.names[24], 8), seq(1,8,1), data_prep_final.24)
+
+
+##25
+data_prep_final.25 = data_prep_final[25,]
+S.names = levels(new_pass$subject)
+data_prep_final.s25 = cbind(rep(S.names[25], 8), seq(1,8,1), data_prep_final.25)
+
+
+##26
+data_prep_final.26 = data_prep_final[26,]
+S.names = levels(new_pass$subject)
+data_prep_final.s26 = cbind(rep(S.names[26], 8), seq(1,8,1), data_prep_final.26)
+
+
+##27
+data_prep_final.27 = data_prep_final[27,]
+S.names = levels(new_pass$subject)
+data_prep_final.s27 = cbind(rep(S.names[27], 8), seq(1,8,1), data_prep_final.27)
+
+
+##28
+data_prep_final.28 = data_prep_final[28,]
+S.names = levels(new_pass$subject)
+data_prep_final.s28 = cbind(rep(S.names[28], 8), seq(1,8,1), data_prep_final.28)
+
+
+##29
+data_prep_final.29 = data_prep_final[29,]
+S.names = levels(new_pass$subject)
+data_prep_final.s29 = cbind(rep(S.names[29], 8), seq(1,8,1), data_prep_final.29)
+
+
+##30
+data_prep_final.30 = data_prep_final[30,]
+S.names = levels(new_pass$subject)
+data_prep_final.s30 = cbind(rep(S.names[30], 8), seq(1,8,1), data_prep_final.30)
+
+##31
+data_prep_final.31 = data_prep_final[31,]
+S.names = levels(new_pass$subject)
+data_prep_final.s31 = cbind(rep(S.names[31], 8), seq(1,8,1), data_prep_final.31)
+
+
+##32
+data_prep_final.32 = data_prep_final[32,]
+S.names = levels(new_pass$subject)
+data_prep_final.s32 = cbind(rep(S.names[32], 8), seq(1,8,1), data_prep_final.32)
+
+
+##33
+data_prep_final.33 = data_prep_final[33,]
+S.names = levels(new_pass$subject)
+data_prep_final.s33 = cbind(rep(S.names[33], 8), seq(1,8,1), data_prep_final.33)
+
+
+##34
+data_prep_final.34 = data_prep_final[34,]
+S.names = levels(new_pass$subject)
+data_prep_final.s34 = cbind(rep(S.names[34], 8), seq(1,8,1), data_prep_final.34)
+
+
+##35
+data_prep_final.35 = data_prep_final[35,]
+S.names = levels(new_pass$subject)
+data_prep_final.s35 = cbind(rep(S.names[35], 8), seq(1,8,1), data_prep_final.35)
+
+
+##36
+data_prep_final.36 = data_prep_final[36,]
+S.names = levels(new_pass$subject)
+data_prep_final.s36 = cbind(rep(S.names[36], 8), seq(1,8,1), data_prep_final.36)
+
+
+##37
+data_prep_final.37 = data_prep_final[37,]
+S.names = levels(new_pass$subject)
+data_prep_final.s37 = cbind(rep(S.names[37], 8), seq(1,8,1), data_prep_final.37)
+
+
+##38
+data_prep_final.38 = data_prep_final[38,]
+S.names = levels(new_pass$subject)
+data_prep_final.s38 = cbind(rep(S.names[38], 8), seq(1,8,1), data_prep_final.38)
+
+
+##39
+data_prep_final.39 = data_prep_final[39,]
+S.names = levels(new_pass$subject)
+data_prep_final.s39 = cbind(rep(S.names[39], 8), seq(1,8,1), data_prep_final.39)
+
+
+##40
+data_prep_final.40 = data_prep_final[40,]
+S.names = levels(new_pass$subject)
+data_prep_final.s40 = cbind(rep(S.names[40], 8), seq(1,8,1), data_prep_final.40)
+
+
+##41
+data_prep_final.41 = data_prep_final[41,]
+S.names = levels(new_pass$subject)
+data_prep_final.s41 = cbind(rep(S.names[41], 8), seq(1,8,1), data_prep_final.41)
+
+##42
+data_prep_final.42 = data_prep_final[42,]
+S.names = levels(new_pass$subject)
+data_prep_final.s42 = cbind(rep(S.names[42], 8), seq(1,8,1), data_prep_final.42)
+
+
+##43
+data_prep_final.43 = data_prep_final[43,]
+S.names = levels(new_pass$subject)
+data_prep_final.s43 = cbind(rep(S.names[43], 8), seq(1,8,1), data_prep_final.43)
+
+
+##44
+data_prep_final.44 = data_prep_final[44,]
+S.names = levels(new_pass$subject)
+data_prep_final.s44 = cbind(rep(S.names[44], 8), seq(1,8,1), data_prep_final.44)
+
+
+##45
+data_prep_final.45 = data_prep_final[45,]
+S.names = levels(new_pass$subject)
+data_prep_final.s45 = cbind(rep(S.names[45], 8), seq(1,8,1), data_prep_final.45)
+
+
+##46
+data_prep_final.46 = data_prep_final[46,]
+S.names = levels(new_pass$subject)
+data_prep_final.s46 = cbind(rep(S.names[46], 8), seq(1,8,1), data_prep_final.46)
+
+
+##47
+data_prep_final.47 = data_prep_final[47,]
+S.names = levels(new_pass$subject)
+data_prep_final.s47 = cbind(rep(S.names[47], 8), seq(1,8,1), data_prep_final.47)
+
+##48
+data_prep_final.48 = data_prep_final[48,]
+S.names = levels(new_pass$subject)
+data_prep_final.s48 = cbind(rep(S.names[48], 8), seq(1,8,1), data_prep_final.48)
+
+
+##49
+data_prep_final.49 = data_prep_final[49,]
+S.names = levels(new_pass$subject)
+data_prep_final.s49 = cbind(rep(S.names[49], 8), seq(1,8,1), data_prep_final.49)
+
+
+##50
+data_prep_final.50 = data_prep_final[50,]
+S.names = levels(new_pass$subject)
+data_prep_final.s50 = cbind(rep(S.names[50], 8), seq(1,8,1), data_prep_final.50)
+
+
+
+##51
+data_prep_final.51 = data_prep_final[51,]
+S.names = levels(new_pass$subject)
+data_prep_final.s51 = cbind(rep(S.names[51], 8), seq(1,8,1), data_prep_final.51)
+
+
+##row bind
+sub_1_51<- rbind(data_prep_final.s1, data_prep_final.s2, data_prep_final.s3, data_prep_final.s4, data_prep_final.s5, data_prep_final.s6, data_prep_final.s7, data_prep_final.s8, data_prep_final.s9, data_prep_final.s10, data_prep_final.s11, data_prep_final.s12, data_prep_final.s13, data_prep_final.s14, data_prep_final.s15, data_prep_final.s16, data_prep_final.s17, data_prep_final.s18, data_prep_final.s19, data_prep_final.s20, data_prep_final.s21, data_prep_final.s22, data_prep_final.s23, data_prep_final.s24, data_prep_final.s25, data_prep_final.s26, data_prep_final.s27, data_prep_final.s28, data_prep_final.s29, data_prep_final.s30, data_prep_final.s31,  data_prep_final.s32,  data_prep_final.s33, data_prep_final.s34, data_prep_final.s35, data_prep_final.s36, data_prep_final.s37,  data_prep_final.s38, data_prep_final.s39, data_prep_final.s40, data_prep_final.s41, data_prep_final.s42, data_prep_final.s43, data_prep_final.s44, data_prep_final.s45, data_prep_final.s46, data_prep_final.s47, data_prep_final.s48, data_prep_final.s49,data_prep_final.s50, data_prep_final.s51)
+
+
+##Rename the data set
+colnames(sub_1_51) = c("Subject","SessionIndex", "AvgTotalTime" )
+rownames(sub_1_51) = seq(1,dim(sub_1_51)[1], 1)
+
+
+##Prepare data more specific analysis
+all_sub<- data.frame(sub_1_51, stringsAsFactors = FALSE)
+
+str(all_sub)
+
+head(all_sub)
+
+all_sub$AvgTotalTime<- as.numeric(all_sub$AvgTotalTime)
+all_sub$Subject<- as.factor(all_sub$Subject)
+all_sub$SessionIndex<- as.factor(all_sub$SessionIndex)
+names(all_sub)
+
+head(all_sub)
+
+qplot(all_sub$Subject, all_sub$AvgTotalTime, xlab=" Subject", ylab="Avg Total Time", main= " Subject vs avg total time to type passcode")
+
+qplot(all_sub$SessionIndex, all_sub$AvgTotalTime, xlab=" Session Index", ylab="Avg Total Time", main= " Session index vs avg total time to type passcode")
+
+##summary of final data set
+summary(all_sub)
+
+
+##Explore new data set for basic information
+
+
+
+
+```
+
+```{r}
+
+##Sub-Task 2
+
+##Final data set
+head(all_sub, n=10)
+
+str(all_sub)
+
+##Set for LMER analysis
+##lmer with considering only total and H.Return variables
+library(lme4)
+lmer_final<- lmer(AvgTotalTime ~ SessionIndex+(1 | Subject), data = all_sub)
+summary(lmer_final)
+
+
+library(multcomp)
+cftest(lmer_final)
+
+```
+
+```{r}
+#Sub-Task 3: Perform a post-hoc analysis testing the assumptions of the models used in Sub-Task 2 
+#and potentially pairwise comparisons that are deemed of interest.
+
+##ref: https://stats.stackexchange.com/questions/237512/how-to-perform-post-hoc-test-on-lmer-model
+
+library(emmeans)
+emmeans(lmer_final, list(pairwise ~ SessionIndex), adjust = "tukey")
+
+library(lmerTest)
+anova(lmer_final)
+
+library(multcomp)
+summary(glht(lmer_final, linfct = mcp(SessionIndex = "Tukey")), test = adjusted("holm"))
+
+
+```
+
+
+
+
+
